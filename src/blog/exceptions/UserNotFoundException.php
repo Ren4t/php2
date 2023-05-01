@@ -1,8 +1,8 @@
 <?php
 
-namespace Habr\Renat\blog\exceptions;
+namespace Habr\Renat\Blog\Exceptions;
 
-use Habr\Renat\blog\exceptions\AppException;
+use Habr\Renat\Blog\Exceptions\AppException;
 
 class UserNotFoundException extends AppException{
     

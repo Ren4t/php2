@@ -1,82 +1,71 @@
 <?php
 
-use Habr\Renat\blog\User as MyUser;
-use Habr\Renat\person\{
-    Name,
-    Person
-};
-use Habr\Renat\blog\{
-    Post,
-    Comment
-};
-use Habr\Renat\blog\repositories\InMemoryUserRepository;
-use Habr\Renat\blog\exceptions\UserNotFoundException;
+use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
+//use Habr\Renat\Blog\Repositories\UserRepository\InMemoryUserRepository;
+use Habr\Renat\Blog\Exceptions\AppException;
+use Habr\Renat\Blog\Commands\CreateUserCommand;
+use Habr\Renat\Blog\Commands\Arguments;
+use Habr\Renat\Blog\Repositories\CommentRepository\SqlCommentRepository;
+use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostRepository;
+use Habr\Renat\Blog\Post;
+use Habr\Renat\Blog\Comment;
+use Habr\Renat\Blog\UUID;
 
 include __DIR__ . "/vendor/autoload.php";
 
-$faker = Faker\Factory::create("ru_RU");
+$connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 
-//echo $faker->name() . PHP_EOL;
-//echo $faker->realText(rand(100, 200)) . PHP_EOL;
+$faker = Faker\Factory::create('ru_RU');
 
-//spl_autoload_register(function ($class) {
-//   
-//    $file = "$class.php";
-//    $file = str_replace("Habr\\Renat\\", "src/", $file);
-//    $file = str_replace("\\", "/", $file);
-//    if (file_exists($file)) {
-//        include $file;
-//    }
-//});
-$name = new Name('Petr', 'Sidorov');
-$user = new MyUser(1, $name, 'admin');
-$person = new Person($name, new DateTimeImmutable());
-//var_dump($argv[2]);
-switch ($argv[1]){
-    
-}
-$post = new Post(
-        1,
-        $person,
-        'Моя статья',
-        $faker->realText(rand(100, 200))
-);
-
-//echo $post;
-
-
-$name2 = new Name('Ivan', 'Petrov');
-$user2 = new MyUser(2, $name2, 'user');
-
-$comment = new Comment(1, $user2, $post, "всё ок");
-//echo $comment;
+$commentRepository = new SqlCommentRepository($connection);
+$postRepository = new SqlitePostRepository($connection);
+$userRepository = new SqliteUsersRepository($connection);
 try {
-    $str = $argv[1];
-    echo $$str;
-} catch (\Habr\Renat\blog\exceptions\AppException $ex) {
+
+    $user1 = $userRepository->getByUsername('lidiy.makarova');
+
+    $post1 = $postRepository->get(new UUID('f6f3139f-ae84-4797-b286-9bddaf02e11c'));
+
+    $postRepository->save(
+            new Post(
+                    UUID::random(),
+                    $user1,
+                    $faker->word(),
+                    $faker->realText(100)
+            )
+    );
+
+    $commentRepository->save(
+            new Comment(
+                    UUID::random(),
+                    $user1,
+                    $post1,
+                    $faker->realText(50)
+            )
+    );
+} catch (Exception $ex) {
     echo $ex->getMessage();
 }
-//$userRepository = new InMemoryUserRepository();
+
+try {
+    var_dump($commentRepository->get(new UUID('c3f85f5e-5168-48bf-ab5a-914ae261c957')));
+} catch (Exception $ex) {
+    
+}
+//$usersRepository = new SqliteUsersRepository($connection);
 //
-//$userRepository->save($user);
-//$userRepository->save($user2);
+//$command = new CreateUserCommand($usersRepository);
 //try {
-//    echo $userRepository->get(1);
-//    echo $userRepository->get(2);
-//    echo $userRepository->get(3);
-//} catch (UserNotFoundException $ex) {
-//    echo $ex->getMessage();
-//} catch (Exception $ex) {
-//    echo $ex->getMessage();
+//// Запускаем команду
+//    $command->handle(Arguments::fromArgv($argv));
+//} catch (AppException $e) {
+//// Выводим сообщения об ошибках
+//    echo "{$e->getMessage()}\n";
 //}
-//function foo(string $str): void{
-//    switch ($str){ 
-//        case "user":
-//            echo new User('Vlad','Ivanov');
-//            break;
-//        case "post":
-//            
-//        default :
-//            echo " не подходящего аргумента";
-//}
+//
+//try {
+//    echo $usersRepository->getByUsername("lidiy.makarova");
+//} catch (Exception $exc) {
+//    var_dump($exc->getTrace());
+//    echo $exc->getMessage();
 //}

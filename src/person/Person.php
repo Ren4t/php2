@@ -1,6 +1,6 @@
 <?php
 
-namespace Habr\Renat\person;
+namespace Habr\Renat\Person;
 
 use \DateTimeImmutable;
 
