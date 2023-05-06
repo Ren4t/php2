@@ -2,6 +2,6 @@
 
 namespace Habr\Renat\Blog\Exceptions;
 
-class AppException extends \Exception{
+class PostNotFoundException extends AppException{
     
 }

@@ -1,25 +1,39 @@
 <?php
 
-namespace Habr\Renat\blog;
+namespace Habr\Renat\Blog;
 
-use Habr\Renat\person\Person;
+use Habr\Renat\Blog\User;
 
 class Post {
 
-    private int $id;
-    private Person $author;
-    private string $title;
-    private string $text;
-
-    public function __construct(int $id, Person $author, string $title, string $text) {
-        $this->id = $id;
-        $this->author = $author;
-        $this->title = $title;
-        $this->text = $text;
+    public function __construct(
+            private UUID $uuid,
+            private User $user,
+            private string $title,
+            private string $text
+    ) {
+        
+    }
+    
+    public function uuid(): UUID {
+        return $this->uuid;
     }
 
+    public function user(): User {
+        return $this->user;
+    }
+
+    public function title(): string {
+        return $this->title;
+    }
+
+    public function text(): string {
+        return $this->text;
+    }
+
+    
     public function __toString() {
-        return "Статья\n$this->author\n $this->title\n$this->text" . PHP_EOL;
+        return "Статья\n" . $this->user->getUsername() . "\n $this->title\n$this->text" . PHP_EOL;
     }
 
 }

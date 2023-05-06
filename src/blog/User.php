@@ -1,29 +1,33 @@
 <?php
 
-namespace Habr\Renat\blog;
+namespace Habr\Renat\Blog;
 
-use Habr\Renat\person\Name;
+use Habr\Renat\Person\Name;
 
 class User {
 
     public function __construct(
-            private int $id,
-            private Name $username,
-            private string $login,
+            private UUID $uuid,
+            private Name $name,
+            private string $username,
     ) {
         
     }
     
-    public function getId(): int {
-        return $this->id;
+    public function uuid(): UUID {
+        return $this->uuid;
     }
-    public function getUsername(): Name {
+    public function name(): Name {
+        return $this->name;
+    }
+    public function username(): string {
         return $this->username;
+        
     }
 
         
     public function __toString(): string{
-        return "Юзер с id $this->id с именем $this->username и логином $this->login." . PHP_EOL;
+        return "Юзер с id $this->uuid с именем $this->name и логином $this->username." . PHP_EOL;
     }
 
 }
