@@ -5,8 +5,8 @@ use Habr\Renat\Blog\Repositories\UserRepository\InMemoryUserRepository;
 use Habr\Renat\Blog\Exceptions\AppException;
 use Habr\Renat\Blog\Commands\CreateUserCommand;
 use Habr\Renat\Blog\Commands\Arguments;
-use Habr\Renat\Blog\Repositories\CommentRepository\SqlCommentRepository;
-use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostRepository;
+use Habr\Renat\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
+use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Habr\Renat\Blog\Post;
 use Habr\Renat\Blog\Comment;
 use Habr\Renat\Blog\User;
@@ -19,17 +19,11 @@ $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 
 $faker = Faker\Factory::create('ru_RU');
 
-$userRepository = new InMemoryUserRepository();
+$userRepository = new SqliteUsersRepository($connection);
 
-$userRepository->save(
-        new User(
-                UUID::random(),
-                new Name($faker->firstName(), $faker->lastName()),
-                'admin'
-        )
-);
+
 try{
-    var_dump($userRepository->getByUsername('admin'));
+    echo $userRepository->getByUsername('ivan');
 } catch (Exception $ex) {
 
 }

@@ -3,7 +3,7 @@
 namespace Habr\Renat\Blog\Repositories\CommentRepository;
 
 use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
-use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostRepository;
+use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Habr\Renat\Blog\Comment;
 use Habr\Renat\Blog\Post;
 use Habr\Renat\Blog\User;
@@ -11,7 +11,7 @@ use Habr\Renat\Blog\UUID;
 use \PDO;
 use \PDOStatement;
 
-class SqlCommentRepository implements CommentsRepositoryInterface{
+class SqliteCommentsRepository implements CommentsRepositoryInterface{
     
     public function __construct(
             private PDO $connection
@@ -27,7 +27,7 @@ class SqlCommentRepository implements CommentsRepositoryInterface{
         $statement->execute([
             ':uuid' => $comment->uuid(),
             ':post_uuid' => $comment->post()->uuid(),
-            ':author_uuid' => $comment->post()->user()->uuid(),
+            ':author_uuid' => $comment->user()->uuid(),
             ':text' => $comment->text()
         ]);
     }
@@ -50,12 +50,12 @@ class SqlCommentRepository implements CommentsRepositoryInterface{
                             "Cannot get comment: $errorString"
             );
         }
-        $userRepository = new SqliteUsersRepository($this->connection);
-        $postRepository = new SqlitePostRepository($this->connection);
+        $usersRepository = new SqliteUsersRepository($this->connection);
+        $postsRepository = new SqlitePostsRepository($this->connection);
         return new Comment(
                 new UUID($result['uuid']),
-                $userRepository->get(new UUID($result['author_uuid'])),
-                $postRepository->get(new UUID($result['post_uuid'])),
+                $usersRepository->get(new UUID($result['author_uuid'])),
+                $postsRepository->get(new UUID($result['post_uuid'])),
                 $result['text']
         );
     }

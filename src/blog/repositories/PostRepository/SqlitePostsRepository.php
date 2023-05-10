@@ -10,7 +10,7 @@ use \PDO;
 use \PDOStatement;
 use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 
-class SqlitePostRepository implements PostsRepositoryInterface{
+class SqlitePostsRepository implements PostsRepositoryInterface{
     
     public function __construct(
             private PDO $connection
@@ -51,10 +51,10 @@ class SqlitePostRepository implements PostsRepositoryInterface{
                             "Cannot get post: $errorString"
             );
         }
-        $userRepository = new SqliteUsersRepository($this->connection);
+        $usersRepository = new SqliteUsersRepository($this->connection);
         return new Post(
                 new UUID($result['uuid']),
-                $userRepository->get(new UUID($result['author_uuid'])),
+                $usersRepository->get(new UUID($result['author_uuid'])),
                 $result['title'],
                 $result['text']
         );
