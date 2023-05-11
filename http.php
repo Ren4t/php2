@@ -8,6 +8,7 @@ use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Http\Actions\Posts\CreateComment;
 use Habr\Renat\Http\Actions\Posts\CreatePost;
 use Habr\Renat\Http\Actions\Posts\FindByUuid;
+use Habr\Renat\Http\Actions\Users\CreateUser;
 use Habr\Renat\Http\Actions\Users\FindByUsername;
 use Habr\Renat\Http\ErrorResponse;
 use Habr\Renat\Http\Request;
@@ -90,6 +91,13 @@ $routes = ['GET' => [
                         new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
                 )
         ),
+        '/users/create' => new CreateUser(
+// Действию нужен репозиторий
+                new SqliteUsersRepository(
+// Репозиторию нужно подключение к БД
+                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
+                )
+        ),
     ]
 ];
 // Если у нас нет маршрута для пути из запроса -
@@ -107,12 +115,11 @@ try {
 // при этом результатом может быть
 // как успешный, так и неуспешный ответ
     $response = $action->handle($request);
-} catch (AppException $e) {
+    $response->send();
+} catch (Exception $e) {
 // Отправляем неудачный ответ,
 // если что-то пошло не так
     (new ErrorResponse($e->getMessage()))->send();
-    return;
 }
 
 // Отправляем ответ
-$response->send();
