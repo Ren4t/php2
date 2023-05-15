@@ -1,11 +1,8 @@
 <?php
 
-use Habr\Renat\Blog\Exceptions\AppException;
 use Habr\Renat\Blog\Exceptions\HttpException;
-use Habr\Renat\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
-use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
-use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Http\Actions\Posts\CreateComment;
+use Habr\Renat\Http\Actions\Posts\CreateLike;
 use Habr\Renat\Http\Actions\Posts\CreatePost;
 use Habr\Renat\Http\Actions\Posts\FindByUuid;
 use Habr\Renat\Http\Actions\Users\CreateUser;
@@ -13,8 +10,9 @@ use Habr\Renat\Http\Actions\Users\FindByUsername;
 use Habr\Renat\Http\ErrorResponse;
 use Habr\Renat\Http\Request;
 
-require_once __DIR__ . '/vendor/autoload.php';
-
+// Подключаем файл bootstrap.php
+// и получаем настроенный контейнер
+$container = require __DIR__ . '/bootstrap.php';
 //$connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 //$usersRepository = new SqliteUsersRepository($connection);
 //$findByUsername = new FindByUsername($usersRepository);
@@ -57,49 +55,22 @@ try {
 
 $routes = ['GET' => [
 // Создаём действие, соответствующее пути /users/show
-        '/users/show' => new FindByUsername(
-// Действию нужен репозиторий
-                new SqliteUsersRepository(
-// Репозиторию нужно подключение к БД
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                )
-        ),
+        '/users/show' => FindByUsername::class,
 // Второй маршрут
-        '/posts/show' => new FindByUuid(
-                new SqlitePostsRepository(
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                )
-        ),
+        '/posts/show' => FindByUuid::class,
     ],
     'POST' => [
-        '/posts/create' => new CreatePost(
-                new SqlitePostsRepository(
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                ),
-                new SqliteUsersRepository(
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                )
-        ),
-        '/posts/comment' => new CreateComment(
-                new SqliteCommentsRepository(
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                ),
-                new SqlitePostsRepository(
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                ),
-                new SqliteUsersRepository(
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                )
-        ),
-        '/users/create' => new CreateUser(
-// Действию нужен репозиторий
-                new SqliteUsersRepository(
-// Репозиторию нужно подключение к БД
-                        new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
-                )
-        ),
+        '/posts/create' => CreatePost::class,
+        '/posts/comment' => CreateComment::class,
+        '/users/create' => CreateUser::class,
+        '/posts/like' => CreateLike::class,
     ]
 ];
+
+if (!array_key_exists($method, $routes)) {
+(new ErrorResponse("Route not found: $method $path"))->send();
+return;
+}
 // Если у нас нет маршрута для пути из запроса -
 // отправляем неуспешный ответ
 if (!array_key_exists($path, $routes[$method])) {
@@ -108,7 +79,9 @@ if (!array_key_exists($path, $routes[$method])) {
 }
 
 // Выбираем найденное действие
-$action = $routes[$method][$path];
+$actionClassName = $routes[$method][$path];
+
+$action = $container->get($actionClassName);
 
 try {
 // Пытаемся выполнить действие,

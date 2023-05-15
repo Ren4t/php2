@@ -1,20 +1,26 @@
 {
     "name": "habr/renat",
     "description": "programm post creating json object",
-    "autoload": {
-        "psr-4": {
-            "Habr\\Renat\\": "src/"
-        }
-    },
     "authors": [
         {
             "name": "Renat",
             "email": "myemail@email.ru"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "Habr\\Renat\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Habr\\Renat\\UnitTests\\": "tests/"
+        }
+    },
     "require": {
         "ext-pdo": "*",
-        "symfony/polyfill-uuid": "^1.27"
+        "symfony/polyfill-uuid": "^1.27",
+        "psr/container": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.21",
