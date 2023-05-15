@@ -6,7 +6,7 @@ use Habr\Renat\Blog\Exceptions\UserNotFoundException;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Blog\UUID;
 
-class InMemoryUserRepository implements UsersRepositoryInterface {
+class InMemoryUsersRepository implements UsersRepositoryInterface {
 
     private array $users = [];
 

@@ -1,32 +1,53 @@
 <?php
 
-use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
-use Habr\Renat\Blog\Repositories\UserRepository\InMemoryUserRepository;
-use Habr\Renat\Blog\Exceptions\AppException;
-use Habr\Renat\Blog\Commands\CreateUserCommand;
-use Habr\Renat\Blog\Commands\Arguments;
-use Habr\Renat\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
+use Habr\Renat\Blog\Like;
+use Habr\Renat\Blog\Repositories\LikeRepository\SqliteLikesRepository;
 use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
-use Habr\Renat\Blog\Post;
-use Habr\Renat\Blog\Comment;
-use Habr\Renat\Blog\User;
+use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Blog\UUID;
-use Habr\Renat\Person\Name;
+//// Подключаем файл bootstrap.php
+//// и получаем настроенный контейнер
+//$container = require __DIR__ . '/bootstrap.php';
+//// При помощи контейнера создаём команду
+//$command = $container->get(CreateUserCommand::class);
+//try {
+//    $command->handle(Arguments::fromArgv($argv));
+//} catch (AppException $e) {
+//    echo "{$e->getMessage()}\n";
+//}
 
 include __DIR__ . "/vendor/autoload.php";
-
+//
 $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
+//
+//$faker = Faker\Factory::create('ru_RU');
+//
+//$userRepository = new SqliteUsersRepository($connection);
+//
+//
+//try{
+//    echo $userRepository->getByUsername('ivan');
+//} catch (Exception $ex) {
+//
+//}
 
-$faker = Faker\Factory::create('ru_RU');
-
+$likesRepository = new SqliteLikesRepository($connection);
+$postRepository = new SqlitePostsRepository($connection);
+$post = $postRepository->get(new UUID('09451416-c5e6-48e3-8872-c498630170d0'));
 $userRepository = new SqliteUsersRepository($connection);
-
-
 try{
-    echo $userRepository->getByUsername('ivan');
+    $user1= $userRepository->getByUsername('ivan');
+    $user2= $userRepository->getByUsername('ivan44');
 } catch (Exception $ex) {
 
 }
+//$likesRepository->save(new Like(
+//        UUID::random(),
+//        $post,
+//        $user2
+//));
+
+print_r($likesRepository->getByPostUuid(new UUID('09451416-c5e6-48e3-8872-c498630170d0')));
 
 //$commentRepository = new SqlCommentRepository($connection);
 //$postRepository = new SqlitePostRepository($connection);
