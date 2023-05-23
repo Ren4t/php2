@@ -40,6 +40,7 @@ final class Arguments {
             );
         }
         return $this->arguments[$argument];
+        
     }
 
 }
