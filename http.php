@@ -4,6 +4,7 @@ use Habr\Renat\Blog\Exceptions\HttpException;
 use Habr\Renat\Http\Actions\Posts\CreateComment;
 use Habr\Renat\Http\Actions\Posts\CreateLike;
 use Habr\Renat\Http\Actions\Posts\CreatePost;
+use Habr\Renat\Http\Actions\Posts\DeletePost;
 use Habr\Renat\Http\Actions\Posts\FindByUuid;
 use Habr\Renat\Http\Actions\Users\CreateUser;
 use Habr\Renat\Http\Actions\Users\FindByUsername;
@@ -64,6 +65,9 @@ $routes = ['GET' => [
         '/posts/comment' => CreateComment::class,
         '/users/create' => CreateUser::class,
         '/posts/like' => CreateLike::class,
+    ],
+    'DELETE' => [
+        '/posts' => DeletePost::class
     ]
 ];
 

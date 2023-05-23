@@ -3,12 +3,12 @@
 namespace Habr\Renat\Blog\Repositories\PostRepository;
 
 use Habr\Renat\Blog\Exceptions\PostNotFoundException;
-use Habr\Renat\Blog\Repositories\PostRepository\PostsRepositoryInterface;
-use Habr\Renat\Blog\UUID;
 use Habr\Renat\Blog\Post;
-use \PDO;
-use \PDOStatement;
+use Habr\Renat\Blog\Repositories\PostRepository\PostsRepositoryInterface;
 use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
+use Habr\Renat\Blog\UUID;
+use PDO;
+use PDOStatement;
 
 class SqlitePostsRepository implements PostsRepositoryInterface{
     
@@ -43,12 +43,13 @@ class SqlitePostsRepository implements PostsRepositoryInterface{
         return $this->getPost($statement, $uuid);
     }
 
-    public function getPost(PDOStatement $statement, string $errorString): Post {
+    public function getPost(PDOStatement $statement, string $uuid): Post {
+        
         $result = $statement->fetch(PDO::FETCH_ASSOC);
 // Бросаем исключение, если пользователь не найден
         if ($result === false) {
             throw new PostNotFoundException(
-                            "Cannot get post: $errorString"
+                            "Cannot get post: $uuid"
             );
         }
         $usersRepository = new SqliteUsersRepository($this->connection);
@@ -58,5 +59,16 @@ class SqlitePostsRepository implements PostsRepositoryInterface{
                 $result['title'],
                 $result['text']
         );
+    }
+    
+    public function delete(UUID $uuid) {
+        
+        $statement = $this->connection->prepare(
+                'DELETE FROM posts WHERE posts.uuid=:uuid;'
+        );
+        
+        $statement->execute([
+            ':uuid' =>$uuid
+        ]);
     }
 }

@@ -37,7 +37,7 @@ class SqliteUsersRepositoryTest extends TestCase {
     }
 
     // Тест, проверяющий, что репозиторий сохраняет данные в БД
-    public function testItSavesUserToDatabase(): void {
+    public function testItSaveUserToDatabase(): void {
 // 2. Создаём стаб подключения
         $connectionStub = $this->createStub(PDO::class);
 // 4. Создаём мок запроса, возвращаемый стабом подключения
