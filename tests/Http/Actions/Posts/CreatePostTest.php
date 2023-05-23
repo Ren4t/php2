@@ -21,9 +21,9 @@ class CreatePostTest extends TestCase {
      * @preserveGlobalState disabled
      */
     public function testItReturnsSuccessfulResponse(): void {
-        $request = new Request(['username' => 'ivan'], [], '"author_uuid": "c7b0aada-fdab-4e4a-8c8b-5399956fa670",
+        $request = new Request(['username' => 'ivan'], [], '{"author_uuid": "c7b0aada-fdab-4e4a-8c8b-5399956fa670",
 "title": "some_title",
-"text": "some text"');
+"text": "some text"}');
 
         $usersRepository = $this->usersRepository([
             new User(
@@ -35,6 +35,8 @@ class CreatePostTest extends TestCase {
         $postsRepository = $this->postsRepository([]);
         $action = new CreatePost($postsRepository, $usersRepository);
         $response = $action->handle($request);
+//        $actual = $request->jsonBodyField("author_uuid");
+//        $this->assertEquals("c7b0aada-fdab-4e4a-8c8b-5399956fa670", $actual);
         $this->assertInstanceOf(SuccessfulResponse::class, $response);
         $response->send();
     }
@@ -74,7 +76,7 @@ class CreatePostTest extends TestCase {
 
             public function get(UUID $uuid): User {
                 foreach ($this->users as $user) {
-                    if ($user instanceof User && $uuid === $user->uuid()) {
+                    if ($user instanceof User && (string)$uuid === (string)$user->uuid()) {
                         return $user;
                     }
                 }
