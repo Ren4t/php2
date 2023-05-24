@@ -1,24 +1,32 @@
 <?php
 
-use Habr\Renat\Blog\Like;
-use Habr\Renat\Blog\Repositories\LikeRepository\SqliteLikesRepository;
-use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
-use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
-use Habr\Renat\Blog\UUID;
-//// Подключаем файл bootstrap.php
-//// и получаем настроенный контейнер
-//$container = require __DIR__ . '/bootstrap.php';
-//// При помощи контейнера создаём команду
-//$command = $container->get(CreateUserCommand::class);
-//try {
-//    $command->handle(Arguments::fromArgv($argv));
-//} catch (AppException $e) {
-//    echo "{$e->getMessage()}\n";
-//}
+use Habr\Renat\Blog\Commands\Arguments;
+use Habr\Renat\Blog\Commands\CreateUserCommand;
+use Habr\Renat\Blog\Exceptions\AppException;
+use Psr\Log\LoggerInterface;
 
-include __DIR__ . "/vendor/autoload.php";
+//php cli.php username=user123 first_name=Ivan last_name=Baraban
+// Подключаем файл bootstrap.php
+// и получаем настроенный контейнер
+$container = require __DIR__ . '/bootstrap.php';
+// При помощи контейнера создаём команду
+$command = $container->get(CreateUserCommand::class);
+
+// Получаем объект логгера из контейнера
+$logger = $container->get(LoggerInterface::class);
+try {
+    $command->handle(Arguments::fromArgv($argv));
+} catch (AppException $e) {
+    // Логируем информацию об исключении.
+// Объект исключения передаётся логгеру
+// с ключом "exception".
+// Уровень логирования – ERROR
+    $logger->error($e->getMessage(), ['exception' => $e]);
+}
+
+//include __DIR__ . "/vendor/autoload.php";
 //
-$connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
+//$connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 //
 //$faker = Faker\Factory::create('ru_RU');
 //
@@ -31,23 +39,23 @@ $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 //
 //}
 
-$likesRepository = new SqliteLikesRepository($connection);
-$postRepository = new SqlitePostsRepository($connection);
-$post = $postRepository->get(new UUID('09451416-c5e6-48e3-8872-c498630170d0'));
-$userRepository = new SqliteUsersRepository($connection);
-try{
-    $user1= $userRepository->getByUsername('ivan');
-    $user2= $userRepository->getByUsername('ivan44');
-} catch (Exception $ex) {
-
-}
+//$likesRepository = new SqliteLikesRepository($connection);
+//$postRepository = new SqlitePostsRepository($connection);
+//$post = $postRepository->get(new UUID('09451416-c5e6-48e3-8872-c498630170d0'));
+//$userRepository = new SqliteUsersRepository($connection);
+//try{
+//    $user1= $userRepository->getByUsername('ivan');
+//    $user2= $userRepository->getByUsername('ivan44');
+//} catch (Exception $ex) {
+//
+//}
 //$likesRepository->save(new Like(
 //        UUID::random(),
 //        $post,
 //        $user2
 //));
 
-print_r($likesRepository->getByPostUuid(new UUID('09451416-c5e6-48e3-8872-c498630170d0')));
+//print_r($likesRepository->getByPostUuid(new UUID('09451416-c5e6-48e3-8872-c498630170d0')));
 
 //$commentRepository = new SqlCommentRepository($connection);
 //$postRepository = new SqlitePostRepository($connection);

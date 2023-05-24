@@ -23,9 +23,9 @@ class SqliteLikesRepository implements LikesRepositoryInterface {
                 "INSERT INTO `likes` (uuid, post_uuid,author_uuid) VALUES (:uuid, :post_uuid, :author_uuid)"
         );
         $statement->execute([
-            ':uuid'=> $like->uuid(),
-            ':post_uuid'=> $like->post()->uuid(),
-            ':author_uuid'=> $like->user()->uuid(),
+            ':uuid' => (string) $like->uuid(),
+            ':post_uuid' => (string) $like->post()->uuid(),
+            ':author_uuid' => (string) $like->user()->uuid(),
         ]);
     }
 
@@ -39,9 +39,9 @@ class SqliteLikesRepository implements LikesRepositoryInterface {
         return $this->getLikes($statement, $uuid);
     }
 
-    public function getLikes(PDOStatement $statement, string $uuid) : array{
+    public function getLikes(PDOStatement $statement, string $uuid): array {
         $resultArray = $statement->fetchAll(PDO::FETCH_ASSOC);
-        if (count($resultArray) == 0) {
+        if (!$resultArray) {
             throw new LikesNotFoundException(
                             "Cannot get likes: $uuid"
             );
@@ -50,13 +50,14 @@ class SqliteLikesRepository implements LikesRepositoryInterface {
         $postsRepository = new SqlitePostsRepository($this->connection);
         $post = $postsRepository->get(new UUID($uuid));
         $likes = [];
-        foreach ($resultArray as $result){
+        foreach ($resultArray as $result) {
             $likes[] = new Like(
-                    new UUID($result['uuid']),
-                    $post,
-                    $usersRepository->get(new UUID($result['author_uuid']))
-                    );
+                    uuid: new UUID($result['uuid']),
+                    post: $post,
+                    user: $usersRepository->get(new UUID($result['author_uuid']))
+            );
         }
         return $likes;
     }
+
 }

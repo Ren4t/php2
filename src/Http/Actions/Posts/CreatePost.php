@@ -14,6 +14,7 @@ use Habr\Renat\Http\ErrorResponse;
 use Habr\Renat\Http\Request;
 use Habr\Renat\Http\Response;
 use Habr\Renat\Http\SuccessfulResponse;
+use Psr\Log\LoggerInterface;
 
 class CreatePost implements ActionInterface {
 
@@ -21,6 +22,8 @@ class CreatePost implements ActionInterface {
     public function __construct(
             private PostsRepositoryInterface $postsRepository,
             private UsersRepositoryInterface $usersRepository,
+            // Внедряем контракт логгера
+            private LoggerInterface $logger
     ) {
         
     }
@@ -54,6 +57,9 @@ class CreatePost implements ActionInterface {
         }
 // Сохраняем новую статью в репозитории
         $this->postsRepository->save($post);
+
+        // Логируем UUID новой статьи
+        $this->logger->info("Post created: $newPostUuid");
 // Возвращаем успешный ответ,
 // содержащий UUID новой статьи
         return new SuccessfulResponse([
