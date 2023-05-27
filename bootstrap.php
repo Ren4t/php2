@@ -10,8 +10,8 @@ use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Blog\Repositories\UserRepository\UsersRepositoryInterface;
 use Habr\Renat\Container\DIContainer;
-use Habr\Renat\Http\Auth\IdentificationInterface;
-use Habr\Renat\Http\Auth\JsonBodyUuidIdentification;
+use Habr\Renat\Http\Auth\AuthenticationInterface;
+use Habr\Renat\Http\Auth\PasswordAuthentication;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -110,9 +110,13 @@ $container->bind(
         LikesRepositoryInterface::class,
         SqliteLikesRepository::class
 );
+//$container->bind(
+//        AuthenticationInterface::class,
+//        JsonBodyUuidIdentification::class
+//);
 $container->bind(
-        IdentificationInterface::class,
-        JsonBodyUuidIdentification::class
+        AuthenticationInterface::class,
+        PasswordAuthentication::class
 );
 // Возвращаем объект контейнера
 return $container;
