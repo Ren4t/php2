@@ -2,16 +2,17 @@
 
 namespace Habr\Renat\UnitTests\Blog\Commands;
 
-use PHPUnit\Framework\TestCase;
-use Habr\Renat\Blog\Commands\CreateUserCommand;
-use Habr\Renat\Blog\Exceptions\CommandException;
 use Habr\Renat\Blog\Commands\Arguments;
+use Habr\Renat\Blog\Commands\CreateUserCommand;
 use Habr\Renat\Blog\Exceptions\ArgumentsException;
+use Habr\Renat\Blog\Exceptions\CommandException;
+use Habr\Renat\Blog\Exceptions\UserNotFoundException;
 use Habr\Renat\Blog\Repositories\UserRepository\UsersRepositoryInterface;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Blog\UUID;
-use Habr\Renat\Blog\Exceptions\UserNotFoundException;
 use Habr\Renat\Person\Name;
+use Habr\Renat\UnitTests\DummyLogger;
+use PHPUnit\Framework\TestCase;
 
 class CreateUserCommandTest extends TestCase {
 
@@ -55,7 +56,8 @@ class CreateUserCommandTest extends TestCase {
 // У команды одна зависимость - UsersRepositoryInterface
 
         $command = new CreateUserCommand(
-                $userRepository
+                $userRepository,
+                new DummyLogger()
         );
 // Описываем тип ожидаемого исключения
         $this->expectException(CommandException::class);
@@ -67,7 +69,7 @@ class CreateUserCommandTest extends TestCase {
 
     public function testItRequiresLastName(): void {
 // Передаём в конструктор команды объект, возвращаемый нашей функцией
-        $command = new CreateUserCommand($this->makeUsersRepository());
+        $command = new CreateUserCommand($this->makeUsersRepository(),new DummyLogger());
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: last_name');
         $command->handle(new Arguments([
@@ -81,7 +83,7 @@ class CreateUserCommandTest extends TestCase {
 // Тест проверяет, что команда действительно требует имя пользователя
     public function testItRequiresFirstName(): void {
 // Вызываем ту же функцию
-        $command = new CreateUserCommand($this->makeUsersRepository());
+        $command = new CreateUserCommand($this->makeUsersRepository(),new DummyLogger());
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: first_name');
         $command->handle(new Arguments(['username' => 'Ivan']));
@@ -119,7 +121,7 @@ class CreateUserCommandTest extends TestCase {
             }
         };
 // Передаём наш мок в команду
-        $command = new CreateUserCommand($usersRepository);
+        $command = new CreateUserCommand($usersRepository,new DummyLogger());
 // Запускаем команду
         $command->handle(new Arguments([
                     'username' => 'Ivan',

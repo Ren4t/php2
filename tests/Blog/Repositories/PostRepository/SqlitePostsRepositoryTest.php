@@ -8,6 +8,7 @@ use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Blog\UUID;
 use Habr\Renat\Person\Name;
+use Habr\Renat\UnitTests\DummyLogger;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\TestCase;
@@ -22,9 +23,9 @@ class SqlitePostsRepositoryTest extends TestCase {
         $statementStub->method('fetch')->willReturn(false);
         $connectionMock->method('prepare')->willReturn($statementStub);
 
-        $repository = new SqlitePostsRepository($connectionMock);
+        $repository = new SqlitePostsRepository($connectionMock, new DummyLogger());
 
-        $this->expectExceptionMessage('Cannot get post: c3f85f5e-5168-48bf-ab5a-914ae261c957');
+        $this->expectExceptionMessage('Cannot found post: c3f85f5e-5168-48bf-ab5a-914ae261c957');
         $this->expectException(PostNotFoundException::class);
         $repository->get(new UUID("c3f85f5e-5168-48bf-ab5a-914ae261c957"));
     }
@@ -46,7 +47,7 @@ class SqlitePostsRepositoryTest extends TestCase {
 
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new SqlitePostsRepository($connectionStub);
+        $repository = new SqlitePostsRepository($connectionStub, new DummyLogger());
 
         $user = new User(
                 new UUID('c3f85f5e-5168-48bf-ab5a-914ae261c957'),
@@ -81,7 +82,7 @@ class SqlitePostsRepositoryTest extends TestCase {
 
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new SqlitePostsRepository($connectionStub);
+        $repository = new SqlitePostsRepository($connectionStub, new DummyLogger());
         $post = $repository->get(new UUID('c3f85f5e-5168-48bf-ab5a-914ae261c957'));
 
         $this->assertSame('c3f85f5e-5168-48bf-ab5a-914ae261c957', (string) $post->uuid());
@@ -109,7 +110,7 @@ class SqlitePostsRepositoryTest extends TestCase {
 
         $connectionMock->method('prepare')->willReturn($statementStubPost, $statementStubUser);//перебор по порядку
 
-        $repository = new SqlitePostsRepository($connectionMock);
+        $repository = new SqlitePostsRepository($connectionMock, new DummyLogger());
         $post = $repository->get(new UUID('c3f85f5e-5168-48bf-ab5a-914ae261c957'));
 
         $this->assertSame('c3f85f5e-5168-48bf-ab5a-914ae261c957', (string) $post->uuid());

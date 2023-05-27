@@ -2,17 +2,19 @@
 
 namespace Habr\Renat\Blog\Repositories\UserRepository;
 
+use Habr\Renat\Blog\Exceptions\UserNotFoundException;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Blog\UUID;
 use Habr\Renat\Person\Name;
-use Habr\Renat\Blog\Exceptions\UserNotFoundException;
-use \PDO;
-use \PDOStatement;
+use PDO;
+use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqliteUsersRepository implements UsersRepositoryInterface {
 
     public function __construct(
-            private PDO $connection
+            private PDO $connection,
+            private LoggerInterface $logger
     ) {
         
     }
@@ -22,13 +24,16 @@ class SqliteUsersRepository implements UsersRepositoryInterface {
         $statement = $this->connection->prepare(
                 "INSERT INTO users (first_name, last_name, uuid, username) VALUES (:first_name, :last_name, :uuid, :username)"
         );
+
+        $uuid = $user->uuid();
 // Выполняем запрос с конкретными значениями
         $statement->execute([
             ':first_name' => $user->name()->first(),
             ':last_name' => $user->name()->last(),
-            ':uuid' => $user->uuid(),
+            ':uuid' => $uuid,
             ':username' => $user->username()
         ]);
+        $this->logger->info("Save user $uuid");
     }
 
     public function get(UUID $uuid): User {
@@ -51,13 +56,13 @@ class SqliteUsersRepository implements UsersRepositoryInterface {
         return $this->getUser($statement, $username);
     }
 
-    public function getUser(PDOStatement $statement, string $errorString): User {
+    public function getUser(PDOStatement $statement, string $uuid): User {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
 // Бросаем исключение, если пользователь не найден
         if ($result === false) {
-            throw new UserNotFoundException(
-                            "Cannot get user: $errorString"
-            );
+            $message = "Cannot found user: $uuid";
+            $this->logger->warning($message);
+            throw new UserNotFoundException($message);
         }
         return new User(
                 new UUID($result['uuid']),

@@ -1,3 +1,5 @@
 /vendor/
 /nbproject/
 /coverage_report/
+.phpunit.result.cache
+.env

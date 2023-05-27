@@ -9,11 +9,13 @@ use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Blog\UUID;
 use PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqliteLikesRepository implements LikesRepositoryInterface {
 
     public function __construct(
-            private PDO $connection
+            private PDO $connection,
+            private LoggerInterface $logger
     ) {
         
     }
@@ -22,11 +24,16 @@ class SqliteLikesRepository implements LikesRepositoryInterface {
         $statement = $this->connection->prepare(
                 "INSERT INTO `likes` (uuid, post_uuid,author_uuid) VALUES (:uuid, :post_uuid, :author_uuid)"
         );
+
+        $uuid = $like->uuid();
+
         $statement->execute([
-            ':uuid' => (string) $like->uuid(),
+            ':uuid' => (string) $uuid,
             ':post_uuid' => (string) $like->post()->uuid(),
             ':author_uuid' => (string) $like->user()->uuid(),
         ]);
+
+        $this->logger->info("Save like $uuid");
     }
 
     public function getByPostUuid(UUID $uuid): array {
@@ -42,9 +49,9 @@ class SqliteLikesRepository implements LikesRepositoryInterface {
     public function getLikes(PDOStatement $statement, string $uuid): array {
         $resultArray = $statement->fetchAll(PDO::FETCH_ASSOC);
         if (!$resultArray) {
-            throw new LikesNotFoundException(
-                            "Cannot get likes: $uuid"
-            );
+            $message = "Cannot found likes: $uuid";
+            $this->logger->warning($message);
+            throw new LikesNotFoundException($message);
         }
         $usersRepository = new SqliteUsersRepository($this->connection);
         $postsRepository = new SqlitePostsRepository($this->connection);

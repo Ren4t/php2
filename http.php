@@ -89,12 +89,14 @@ try {
 // как успешный, так и неуспешный ответ
     $response = $action->handle($request);
     // Отправляем ответ
-    $response->send();
 } catch (Exception $e) {
     // Логируем сообщение с уровнем ERROR
     $logger->error($e->getMessage(), ['exception' => $e]);
 // Больше не отправляем пользователю
 // конкретное сообщение об ошибке,
 // а только логируем его
-    (new ErrorResponse)->send();
+    (new ErrorResponse($e->getMessage()))->send();
+    return;
 }
+
+$response->send();

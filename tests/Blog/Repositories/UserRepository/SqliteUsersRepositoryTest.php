@@ -6,9 +6,10 @@ use Habr\Renat\Blog\Exceptions\UserNotFoundException;
 use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Blog\UUID;
+use Habr\Renat\Person\Name;
+use Habr\Renat\UnitTests\DummyLogger;
 use PDO;
 use PDOStatement;
-use Habr\Renat\Person\Name;
 use PHPUnit\Framework\TestCase;
 
 class SqliteUsersRepositoryTest extends TestCase {
@@ -28,10 +29,10 @@ class SqliteUsersRepositoryTest extends TestCase {
 // стаб запроса - при вызове метода prepare
         $connectionStub->method('prepare')->willReturn($statementStub);
 // 1. Передаём в репозиторий стаб подключения
-        $repository = new SqliteUsersRepository($connectionStub);
+        $repository = new SqliteUsersRepository($connectionStub, new DummyLogger());
 // Ожидаем, что будет брошено исключение
         $this->expectException(UserNotFoundException::class);
-        $this->expectExceptionMessage('Cannot get user: Ivan');
+        $this->expectExceptionMessage('Cannot found user: Ivan');
 // Вызываем метод получения пользователя
         $repository->getByUsername('Ivan');
     }
@@ -57,7 +58,7 @@ class SqliteUsersRepositoryTest extends TestCase {
 // возвращает мок запроса
         $connectionStub->method('prepare')->willReturn($statementMock);
 // 1. Передаём в репозиторий стаб подключения
-        $repository = new SqliteUsersRepository($connectionStub);
+        $repository = new SqliteUsersRepository($connectionStub, new DummyLogger());
 // Вызываем метод сохранения пользователя
         $repository->save(
                 new User(// Свойства пользователя точно такие,

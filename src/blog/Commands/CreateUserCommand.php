@@ -31,8 +31,9 @@ class CreateUserCommand {
         if ($this->userExists($username)) {
             // Логируем сообщение с уровнем WARNING
             $this->logger->warning("User already exists: $username");
+            throw new CommandException("User already exists: $username");
 // Вместо выбрасывания исключения просто выходим из функции
-            return;
+           // return;
 // Бросаем исключение, если пользователь уже существует
             //           throw new CommandException("User already exists: $username");
         }
@@ -44,8 +45,6 @@ class CreateUserCommand {
                         $username
         ));
 
-        // Логируем информацию о новом пользователе
-        $this->logger->info("User created: $uuid");
     }
 
     private function userExists(string $username): bool {
