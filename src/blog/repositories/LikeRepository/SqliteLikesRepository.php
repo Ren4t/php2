@@ -9,11 +9,13 @@ use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Blog\UUID;
 use PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqliteLikesRepository implements LikesRepositoryInterface {
 
     public function __construct(
-            private PDO $connection
+            private PDO $connection,
+            private LoggerInterface $logger
     ) {
         
     }
@@ -22,11 +24,16 @@ class SqliteLikesRepository implements LikesRepositoryInterface {
         $statement = $this->connection->prepare(
                 "INSERT INTO `likes` (uuid, post_uuid,author_uuid) VALUES (:uuid, :post_uuid, :author_uuid)"
         );
+
+        $uuid = $like->uuid();
+
         $statement->execute([
-            ':uuid'=> $like->uuid(),
-            ':post_uuid'=> $like->post()->uuid(),
-            ':author_uuid'=> $like->user()->uuid(),
+            ':uuid' => (string) $uuid,
+            ':post_uuid' => (string) $like->post()->uuid(),
+            ':author_uuid' => (string) $like->user()->uuid(),
         ]);
+
+        $this->logger->info("Save like $uuid");
     }
 
     public function getByPostUuid(UUID $uuid): array {
@@ -39,24 +46,25 @@ class SqliteLikesRepository implements LikesRepositoryInterface {
         return $this->getLikes($statement, $uuid);
     }
 
-    public function getLikes(PDOStatement $statement, string $uuid) : array{
+    public function getLikes(PDOStatement $statement, string $uuid): array {
         $resultArray = $statement->fetchAll(PDO::FETCH_ASSOC);
-        if (count($resultArray) == 0) {
-            throw new LikesNotFoundException(
-                            "Cannot get likes: $uuid"
-            );
+        if (!$resultArray) {
+            $message = "Cannot found likes: $uuid";
+            $this->logger->warning($message);
+            throw new LikesNotFoundException($message);
         }
         $usersRepository = new SqliteUsersRepository($this->connection);
         $postsRepository = new SqlitePostsRepository($this->connection);
         $post = $postsRepository->get(new UUID($uuid));
         $likes = [];
-        foreach ($resultArray as $result){
+        foreach ($resultArray as $result) {
             $likes[] = new Like(
-                    new UUID($result['uuid']),
-                    $post,
-                    $usersRepository->get(new UUID($result['author_uuid']))
-                    );
+                    uuid: new UUID($result['uuid']),
+                    post: $post,
+                    user: $usersRepository->get(new UUID($result['author_uuid']))
+            );
         }
         return $likes;
     }
+
 }

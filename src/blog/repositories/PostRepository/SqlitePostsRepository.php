@@ -9,11 +9,13 @@ use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Blog\UUID;
 use PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqlitePostsRepository implements PostsRepositoryInterface{
     
     public function __construct(
-            private PDO $connection
+            private PDO $connection,
+            private LoggerInterface $logger
     ) {
         
     }
@@ -24,13 +26,17 @@ class SqlitePostsRepository implements PostsRepositoryInterface{
         $statement = $this->connection->prepare(
                 "INSERT INTO posts (uuid, author_uuid, title, text) VALUES (:uuid, :author_uuid, :title, :text)"
         );
+        
+        $uuid = $post->uuid();
 // Выполняем запрос с конкретными значениями
         $statement->execute([
-            ':uuid' => $post->uuid(),
+            ':uuid' => $uuid,
             ':author_uuid' => $post->user()->uuid(),
             ':title' => $post->title(),
             ':text' => $post->text()
         ]);
+        
+        $this->logger->info("Save post $uuid");
     }
     
     public function get(UUID $uuid): Post {
@@ -48,11 +54,12 @@ class SqlitePostsRepository implements PostsRepositoryInterface{
         $result = $statement->fetch(PDO::FETCH_ASSOC);
 // Бросаем исключение, если пользователь не найден
         if ($result === false) {
-            throw new PostNotFoundException(
-                            "Cannot get post: $uuid"
-            );
+            $message = "Cannot found post: $uuid";
+            $this->logger->warning($message);
+            throw new PostNotFoundException($message);
         }
-        $usersRepository = new SqliteUsersRepository($this->connection);
+        
+        $usersRepository = new SqliteUsersRepository($this->connection, $this->logger);
         return new Post(
                 new UUID($result['uuid']),
                 $usersRepository->get(new UUID($result['author_uuid'])),
