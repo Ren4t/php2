@@ -9,7 +9,7 @@ use Habr\Renat\Blog\Repositories\UserRepository\UsersRepositoryInterface;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Http\Request;
 
-class JsonBodyUsernameIdentification implements IdentificationInterface {
+class JsonBodyUsernameIdentification implements AuthenticationInterface {
 
     public function __construct(
             private UsersRepositoryInterface $usersRepository

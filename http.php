@@ -1,6 +1,7 @@
 <?php
 
 use Habr\Renat\Blog\Exceptions\HttpException;
+use Habr\Renat\Http\Actions\Auth\LogIn;
 use Habr\Renat\Http\Actions\Posts\CreateComment;
 use Habr\Renat\Http\Actions\Posts\CreateLike;
 use Habr\Renat\Http\Actions\Posts\CreatePost;
@@ -61,6 +62,8 @@ $routes = ['GET' => [
         '/posts/show' => FindByUuid::class,
     ],
     'POST' => [
+        // Добавили маршрут обмена пароля на токен
+        '/login' => LogIn::class,
         '/posts/create' => CreatePost::class,
         '/posts/comment' => CreateComment::class,
         '/users/create' => CreateUser::class,

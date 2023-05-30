@@ -11,7 +11,7 @@ use Habr\Renat\Blog\User;
 use Habr\Renat\Blog\UUID;
 use Habr\Renat\Http\Request;
 
-class JsonBodyUuidIdentification implements IdentificationInterface {
+class JsonBodyUuidIdentification implements AuthenticationInterface {
 
     public function __construct(
             private UsersRepositoryInterface $usersRepository
