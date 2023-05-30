@@ -4,6 +4,7 @@ namespace Habr\Renat\Http\Actions\Posts;
 
 use Habr\Renat\Blog\Exceptions\HttpException;
 use Habr\Renat\Blog\Exceptions\InvalidArgumentException;
+use Habr\Renat\Blog\Exceptions\PostNotFoundException;
 use Habr\Renat\Blog\Exceptions\UserNotFoundException;
 use Habr\Renat\Blog\Like;
 use Habr\Renat\Blog\Repositories\LikeRepository\LikesRepositoryInterface;
@@ -36,7 +37,7 @@ class CreateLike implements ActionInterface{
         try {
             $post = $this->postsRepository->get($postUuid);
             $user = $this->usersRepository->get($authorUuid);
-        } catch (UserNotFoundException $e) {
+        } catch (UserNotFoundException | PostNotFoundException $e) {
             return new ErrorResponse($e->getMessage());
         }
         $newLikeUuid = UUID::random();

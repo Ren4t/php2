@@ -2,6 +2,7 @@
 
 namespace Habr\Renat\UnitTests\Http\Action\Posts;
 
+use Habr\Renat\Blog\Exceptions\AuthException;
 use Habr\Renat\Blog\Exceptions\UserNotFoundException;
 use Habr\Renat\Blog\Post;
 use Habr\Renat\Blog\Repositories\PostRepository\PostsRepositoryInterface;
@@ -9,9 +10,12 @@ use Habr\Renat\Blog\Repositories\UserRepository\UsersRepositoryInterface;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Blog\UUID;
 use Habr\Renat\Http\Actions\Posts\CreatePost;
+use Habr\Renat\Http\Auth\JsonBodyUuidIdentification;
+use Habr\Renat\Http\ErrorResponse;
 use Habr\Renat\Http\Request;
 use Habr\Renat\Http\SuccessfulResponse;
 use Habr\Renat\Person\Name;
+use Habr\Renat\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class CreatePostTest extends TestCase {
@@ -21,23 +25,61 @@ class CreatePostTest extends TestCase {
      * @preserveGlobalState disabled
      */
     public function testItReturnsSuccessfulResponse(): void {
-        $request = new Request(['username' => 'ivan'], [], '{"author_uuid": "c7b0aada-fdab-4e4a-8c8b-5399956fa670",
-"title": "some_title",
-"text": "some text"}');
+        $request = new Request(['username' => 'ivan'], [], '{
+        "author_uuid": "c7b0aada-fdab-4e4a-8c8b-5399956fa670",
+        "title": "some_title",
+        "text": "some text"}');
 
-        $usersRepository = $this->usersRepository([
-            new User(
-                    new UUID('c7b0aada-fdab-4e4a-8c8b-5399956fa670'),
-                    new Name('Ivan', 'Nikitin'),
-                    'ivan'
-            ),
-        ]);
+        $authenication = $this->createStub(JsonBodyUuidIdentification::class);
+        $authenication
+                ->method('user')
+                ->willReturn(
+                        new User(
+                                new UUID('c7b0aada-fdab-4e4a-8c8b-5399956fa670'),
+                                new Name('Ivan', 'Nikitin'),
+                                'ivan'
+                        )
+        );
+
+//        $usersRepository = $this->usersRepository([
+//            new User(
+//                    new UUID('c7b0aada-fdab-4e4a-8c8b-5399956fa670'),
+//                    new Name('Ivan', 'Nikitin'),
+//                    'ivan'
+//            ),
+//        ]);
         $postsRepository = $this->postsRepository([]);
-        $action = new CreatePost($postsRepository, $usersRepository);
+        $action = new CreatePost($postsRepository, $authenication, new DummyLogger());
         $response = $action->handle($request);
 //        $actual = $request->jsonBodyField("author_uuid");
 //        $this->assertEquals("c7b0aada-fdab-4e4a-8c8b-5399956fa670", $actual);
         $this->assertInstanceOf(SuccessfulResponse::class, $response);
+        $response->send();
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testItReturnsErrorResponseIfNotFoundUser(): void {
+        $request = new Request(['username' => 'ivan'], [], '{
+        "author_uuid": "c7b0aada-fdab-4e4a-8c8b-5399956fa670",
+        "title": "some_title",
+        "text": "some text"}');
+
+        $postsRepositoryStub = $this->createStub(PostsRepositoryInterface::class);
+        $authenicationStub = $this->createStub(JsonBodyUuidIdentification::class);
+
+        $authenicationStub
+                ->method('user')
+                ->willThrowException(
+                        new AuthException('Cannnot find user: c7b0aada-fdab-4e4a-8c8b-5399956fa670')
+        );
+        $action = new CreatePost($postsRepositoryStub, $authenicationStub, new DummyLogger());
+        $response = $action->handle($request);
+
+        $this->assertInstanceOf(ErrorResponse::class, $response);
+        $this->expectOutputString('{"success":false,"reason":"Cannnot find user: c7b0aada-fdab-4e4a-8c8b-5399956fa670"}');
         $response->send();
     }
 
@@ -76,7 +118,7 @@ class CreatePostTest extends TestCase {
 
             public function get(UUID $uuid): User {
                 foreach ($this->users as $user) {
-                    if ($user instanceof User && (string)$uuid === (string)$user->uuid()) {
+                    if ($user instanceof User && (string) $uuid === (string) $user->uuid()) {
                         return $user;
                     }
                 }
