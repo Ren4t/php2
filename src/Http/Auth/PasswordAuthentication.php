@@ -9,7 +9,7 @@ use Habr\Renat\Blog\Repositories\UserRepository\UsersRepositoryInterface;
 use Habr\Renat\Blog\User;
 use Habr\Renat\Http\Request;
 
-class PasswordAuthentication implements AuthenticationInterface {
+class PasswordAuthentication implements PasswordAuthenticationInterface {
 
     public function __construct(
             private UsersRepositoryInterface $usersRepository

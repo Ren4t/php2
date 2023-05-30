@@ -8,7 +8,7 @@ use Habr\Renat\Blog\Post;
 use Habr\Renat\Blog\Repositories\PostRepository\PostsRepositoryInterface;
 use Habr\Renat\Blog\UUID;
 use Habr\Renat\Http\Actions\ActionInterface;
-use Habr\Renat\Http\Auth\AuthenticationInterface;
+use Habr\Renat\Http\Auth\TokenAuthenticationInterface;
 use Habr\Renat\Http\ErrorResponse;
 use Habr\Renat\Http\Request;
 use Habr\Renat\Http\Response;
@@ -20,7 +20,7 @@ class CreatePost implements ActionInterface {
     // Внедряем репозитории статей и пользователей
     public function __construct(
             private PostsRepositoryInterface $postsRepository,
-            private AuthenticationInterface $identification,
+            private TokenAuthenticationInterface $identification,
             // Внедряем контракт логгера
             private LoggerInterface $logger
     ) {

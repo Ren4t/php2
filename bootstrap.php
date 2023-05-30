@@ -1,6 +1,8 @@
 <?php
 
 use Dotenv\Dotenv;
+use Habr\Renat\Blog\Repositories\AuthTokenRepository\AuthTokensRepositoryInterface;
+use Habr\Renat\Blog\Repositories\AuthTokenRepository\SqliteAuthTokensRepository;
 use Habr\Renat\Blog\Repositories\CommentRepository\CommentsRepositoryInterface;
 use Habr\Renat\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
 use Habr\Renat\Blog\Repositories\LikeRepository\LikesRepositoryInterface;
@@ -10,8 +12,10 @@ use Habr\Renat\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Habr\Renat\Blog\Repositories\UserRepository\SqliteUsersRepository;
 use Habr\Renat\Blog\Repositories\UserRepository\UsersRepositoryInterface;
 use Habr\Renat\Container\DIContainer;
-use Habr\Renat\Http\Auth\AuthenticationInterface;
+use Habr\Renat\Http\Auth\BearerTokenAuthentication;
 use Habr\Renat\Http\Auth\PasswordAuthentication;
+use Habr\Renat\Http\Auth\PasswordAuthenticationInterface;
+use Habr\Renat\Http\Auth\TokenAuthenticationInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -115,8 +119,17 @@ $container->bind(
 //        JsonBodyUuidIdentification::class
 //);
 $container->bind(
-        AuthenticationInterface::class,
+        PasswordAuthenticationInterface::class,
         PasswordAuthentication::class
 );
+$container->bind(
+        AuthTokensRepositoryInterface::class,
+        SqliteAuthTokensRepository::class
+);
+$container->bind(
+TokenAuthenticationInterface::class,
+BearerTokenAuthentication::class
+);
+
 // Возвращаем объект контейнера
 return $container;

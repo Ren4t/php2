@@ -57,3 +57,6 @@
 [2023-05-27T09:20:34.035173+00:00] blog.INFO: User created: c25d03de-a2a6-4f5d-89ce-8c972613e291 [] []
 [2023-05-27T09:21:25.656430+00:00] blog.INFO: Save post 8eb8f936-c2b8-4b0f-80ca-c09e5e9f06b5 [] []
 [2023-05-27T09:21:25.662092+00:00] blog.INFO: Post created: 8eb8f936-c2b8-4b0f-80ca-c09e5e9f06b5 [] []
+[2023-05-28T17:03:09.119456+00:00] blog.WARNING: Cannot found user: user4 [] []
+[2023-05-28T19:01:20.024903+00:00] blog.INFO: Save post 4b1534cd-082c-4e8c-8615-298a0bdccb62 [] []
+[2023-05-28T19:01:20.110628+00:00] blog.INFO: Post created: 4b1534cd-082c-4e8c-8615-298a0bdccb62 [] []
