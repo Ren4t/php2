@@ -69,7 +69,7 @@ class CreateUserCommandTest extends TestCase {
 
     public function testItRequiresLastName(): void {
 // Передаём в конструктор команды объект, возвращаемый нашей функцией
-        $command = new CreateUserCommand($this->makeUsersRepository(),new DummyLogger());
+        $command = new CreateUserCommand($this->makeUsersRepository(), new DummyLogger());
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: last_name');
         $command->handle(new Arguments([
@@ -83,7 +83,7 @@ class CreateUserCommandTest extends TestCase {
 // Тест проверяет, что команда действительно требует имя пользователя
     public function testItRequiresFirstName(): void {
 // Вызываем ту же функцию
-        $command = new CreateUserCommand($this->makeUsersRepository(),new DummyLogger());
+        $command = new CreateUserCommand($this->makeUsersRepository(), new DummyLogger());
         $this->expectException(ArgumentsException::class);
         $this->expectExceptionMessage('No such argument: first_name');
         $command->handle(new Arguments(['username' => 'Ivan']));
@@ -121,7 +121,7 @@ class CreateUserCommandTest extends TestCase {
             }
         };
 // Передаём наш мок в команду
-        $command = new CreateUserCommand($usersRepository,new DummyLogger());
+        $command = new CreateUserCommand($usersRepository, new DummyLogger());
 // Запускаем команду
         $command->handle(new Arguments([
                     'username' => 'Ivan',
@@ -131,6 +131,18 @@ class CreateUserCommandTest extends TestCase {
 // Проверяем утверждение относительно мока,
 // а не утверждение относительно команды
         $this->assertTrue($usersRepository->wasCalled());
+    }
+
+    public function tecreatestItRequiresPassword() {
+        $command = new CreateUserCommand(
+                $this->makeUsersRepository(),
+                new DummyLogger()
+        );
+        $this->expectException(ArgumentsException::class);
+        $this->expectExceptionMessage('No such argument: password');
+        $command->handle(new Arguments([
+                    'username' => 'Ivan',
+        ]));
     }
 
 }
